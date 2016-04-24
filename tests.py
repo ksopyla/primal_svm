@@ -24,7 +24,7 @@ class PrimalSVMTests(unittest.TestCase):
         
         expectedObj=2.0650000000000004
         
-        result = self.svm._obj_func(w,X,Y,out)
+        result,_ = self.svm._obj_func(w,X,Y,out)
         
         self.assertAlmostEqual(expectedObj, result)
         
@@ -41,10 +41,28 @@ class PrimalSVMTests(unittest.TestCase):
         
         expectedObj=1.0
         
-        result = self.svm._obj_func(w,X,Y,out)
+        result,_  = self.svm._obj_func(w,X,Y,out)
         
         self.assertAlmostEqual(expectedObj, result)
     
+    def test_obj_grad_points(self):
+        
+        bias = 0.0
+        w= np.array([-1,1, bias])
+        l = self.svm.l2reg
+        X = np.array([ [5, 0.3], [1 , -0.8], [1,6], [-0.6, 3]])
+        Y = np.array([-1,-1,1,1])
+        
+        #compute loss for all X -> 1-yi*(xi*w+b)
+        out = np.fmax(0, 1-Y*(X.dot(w[0:-1])+w[-1]))
+        
+        expectedObj=1.0
+        
+        (obj, grad) = self.svm._obj_func(w,X,Y,out)
+        
+        print grad
+        
+        self.assertAlmostEqual(expectedObj, grad)
     
     
 if __name__ == '__main__':

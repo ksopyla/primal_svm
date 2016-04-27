@@ -58,7 +58,7 @@ class PrimalSVM():
         w0[-1]=0
         obj = np.sum(out**2)/2+l2reg*w0.dot(w0)/2
         
-        grad = l2reg*w0 + np.append( [np.dot(out*Y,X)], [np.sum(out*Y)])
+        grad = l2reg*w0 - np.append( [np.dot(out*Y,X)], [np.sum(out*Y)])
         
         return (obj,grad)
     

@@ -29,12 +29,28 @@ class PrimalSVM():
             Returns self.
         """
         
-        pass
+        [n,d] = X.shape
+        w = np.zeros(d+1)
+        
+        
+        if method==0:
+            self._solve_Newton()
+        else:
+            self._solve_CG()
+          
+        
+        
     
     def _solve_Newton(self):
         """
         Solve the primal SVM problem with Newton method
         """
+        pass
+        
+    def _solve_CG(self):
+        pass
+   
+        
     def _obj_func(self,w,X,Y,out):
         """
         Computes primal value end gradient

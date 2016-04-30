@@ -14,38 +14,72 @@ class PrimalSVM():
         self.l2reg = l2reg
         self.newton_iter = newton_iter
     
-    def fit(self, X, y, method=0):
+    def fit(self, X, Y, method=0):
         """Fit the model according to the given training data.
         Parameters
         ----------
         X : {array-like, sparse matrix}, shape = [n_samples, n_features]
             Training vector, where n_samples in the number of samples and
             n_features is the number of features.
-        y : array-like, shape = [n_samples]
+        Y : array-like, shape = [n_samples]
             Target vector relative to X
+        method: 0 - Newton method (with full Hessian computation), 1 - Conjugate Gradient method
         Returns
         -------
         self : object
             Returns self.
         """
         
-        [n,d] = X.shape
-        w = np.zeros(d+1)
-        
-        
         if method==0:
-            self._solve_Newton()
+            self._solve_Newton(X,Y)
         else:
             self._solve_CG()
           
         
         
     
-    def _solve_Newton(self):
+    def _solve_Newton(self,X,Y):
         """
         Solve the primal SVM problem with Newton method
         """
-        pass
+        [n,d] = X.shape
+        
+        #we add one last component, which is b (bias)
+        self.w = np.zeros(d+1)
+        #helper variable for storing 1-Y*(np.dot(X,w))
+        self.out = np.ones((n,1))
+        
+        l= self.l2reg
+        #the number of alg. iteration
+        iter=0
+        
+        while True:
+            iter=iter+1
+            if iter > self.newton_iter:
+                print("Maximum {0} of Newton stpes reached, change newton_iter parameter or try larger lambda".format(iter))
+                break
+            
+            obj, grad = self._obj_func(w,X,Y,out)
+            
+            #np.where retunrs a tuple, we take the first dim
+            sv = np.where( self.out>0)[0]
+            #grab the support vectors
+            Xsv = self.X[sv,:]
+            
+            #reserve memory for hessian
+            hess = np.zeros((d+1,d+1))
+            #compute the hessin, add the first part with lambda
+            hess= hess+ l* np.diag(np.append(np.ones((d,)), 0))
+            
+            #add the second part with dot products between x_i
+            hess[0:d,0:d]= Xsv.T.dot(Xsv)
+            hess[-1,0:d] = Xsv.sum(axis=0)
+            hess[0:d, -1] = Xsv.sum(axis=0)
+            hess[-1,-1] = len(sv[0])
+            
+            #compute step vector
+            step = -hess\grad
+        
         
     def _solve_CG(self):
         pass

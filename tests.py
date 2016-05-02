@@ -10,7 +10,7 @@ class PrimalSVMTests(unittest.TestCase):
         self.X = np.array([[0.5, 0.3], [1, 0.8], [1, 1.4], [0.6, 0.9]])
         self.Y = np.array([-1, -1, 1, 1])
         self.svm = PrimalSVM()
-        self.svm.X = self.X
+        self.svm._X = self.X
 
     def test_obj_value_points_correctly_class_close_to_hyperplane(self):
         bias = 0.0

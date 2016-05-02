@@ -9,3 +9,9 @@ svm = lsvm.PrimalSVM()
 
 #svm.fit(X,Y)
 svm._solve_Newton(X,Y)
+
+
+
+%timeit np.linalg.lstsq(hess,grad)
+
+%timeit np.linalg.solve(hess,grad)

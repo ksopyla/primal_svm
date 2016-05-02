@@ -14,6 +14,8 @@ class PrimalSVM():
         self.l2reg = l2reg
         self.newton_iter = newton_iter
         
+        self._prec = 1e-6
+        
         self.coef_ = None
         self.support_vectors = None
     
@@ -32,6 +34,9 @@ class PrimalSVM():
         self : object
             Returns self.
         """
+        
+        self._X = X
+        self._Y =Y
         
         if method==0:
             self._solve_Newton(X,Y)
@@ -68,16 +73,23 @@ class PrimalSVM():
             #np.where retunrs a tuple, we take the first dim
             sv = np.where( self.out>0)[0]
            
-            
-            
-            
             hess = self._compute_hessian(sv)
             
+            #compute step vector step = -hess\grad
+            # %timeit np.linalg.lstsq(hess,grad)
+            # %timeit np.linalg.solve(hess,grad) - is faster 4x
+            
+            step = np.linalg.solve(hess,grad)
+            
+            t, out = self._line_search(w,step,out)
+            
+            t=0.1
+            w = w+t*step
             
             
-            
-            #compute step vector
-            #step = -hess\grad
+            if step.dot(grad) < self._prec* obj:
+                break;
+
         
         
     def _solve_CG(self):
@@ -95,16 +107,16 @@ class PrimalSVM():
         """
         
         #grab the support vectors
-        Xsv = self.X[sv,:]
+        Xsv = self._X[sv,:]
         
-        [n,d] = self.X.shape
+        [n,d] = self._X.shape
       
         #reserve memory for hessian
         hess = np.zeros((d+1,d+1))
         #first compute the second part with dot products between x_i
-        hess[0:d,0:d]= Xsv.T.dot(Xsv)
-        hess[-1,0:d] = Xsv.sum(axis=0)
-        hess[0:d, -1] = Xsv.sum(axis=0)
+        hess[0:-1,0:-1]= Xsv.T.dot(Xsv)
+        hess[-1,0:-1] = Xsv.sum(axis=0)
+        hess[0:-1, -1] = Xsv.sum(axis=0)
         hess[-1,-1] = len(sv)
         
         #then add the first part with lambda
@@ -140,6 +152,39 @@ class PrimalSVM():
         grad = l2reg*w0 - np.append( [np.dot(out*Y,X)], [np.sum(out*Y)])
         
         return (obj,grad)
+        
+    def _line_search(self, w, d, out):
+        """
+        Performs line search for optimal w in direction d
+        Parameters
+        ----------
+        w : {array-like}  - hyperplane normal vector
+        d : {array-like}  - vector along which we seek optimal sollution
+        
+        """
+        #out = np.fmax(0, out)
+        
+        t=0
+        Xd = self._X.dot(d[0:-1])+d[-1]
+        wd = self.l2reg * w[0:-1].dot(d[0:-1])
+        dd = self.l2reg * d[0:-1].dot(d[0:-1])
+        
+        Y = self._Y
+        
+        while True:
+            out2 = out -t*(Y*Xd)
+            sv = np.where( out>0)[0]
+            
+            #gradient along the line
+            g = wd + t*dd - (out2[sv]*Y[sv]).dot(Xd[sv,:])
+            # second derivative along the line
+            h = dd + Xd[sv,:].dot(Xd[sv,:])
+            # 1D Newton step
+            t=t-g/h
+            
+            if g**2/h < 1e-10:
+                break
+        return t, out2
     
     def predict(self, X):
         pass

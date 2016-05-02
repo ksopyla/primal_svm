@@ -1,25 +1,11 @@
-# Welcome to your new Python project
-# To start, simply click on "Run file" icon
-print("Hello, World!")
-
-
 import numpy as np
-from scipy import sparse
-from scipy.sparse.linalg import dsolve
+import linearSVM as lsvm
 
-mtx = sparse.spdiags([[1, 2, 3, 4, 5], [6, 5, 8, 9, 10]], [0, 1], 5, 5)
-mtx.todense()
 
-rhs = np.array([1, 2, 3, 4, 5], dtype=np.float32)
 
-mtx1 = mtx.astype(np.float32)
-x = dsolve.spsolve(mtx1, rhs, use_umfpack=False)
-print(x)  
+X = np.array([[0.5, 0.3], [1, 0.8], [1, 1.4], [0.6, 0.9]])
+Y = np.array([-1, -1, 1, 1])
+svm = lsvm.PrimalSVM()
 
-print("Error: %s" % (mtx1 * x - rhs)) 
-
-mtx2 = mtx.astype(np.float64)
-x = dsolve.spsolve(mtx2, rhs, use_umfpack=True)
-print(x)  
-
-print("Error: %s" % (mtx2 * x - rhs)) 
+#svm.fit(X,Y)
+svm._solve_Newton(X,Y)

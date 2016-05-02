@@ -10,6 +10,7 @@ class PrimalSVMTests(unittest.TestCase):
         self.X = np.array([[0.5, 0.3], [1, 0.8], [1, 1.4], [0.6, 0.9]])
         self.Y = np.array([-1, -1, 1, 1])
         self.svm = PrimalSVM()
+        self.svm.X = self.X
 
     def test_obj_value_points_correctly_class_close_to_hyperplane(self):
         bias = 0.0
@@ -59,6 +60,21 @@ class PrimalSVMTests(unittest.TestCase):
         (obj, grad) = self.svm._obj_func(w, X, Y, out)
 
         np.testing.assert_array_almost_equal(expected, grad)
+        
+    def test_compute_hessian(self):
+        bias = 0.0
+        w = np.array([-1, 1, bias])
+        l = self.svm.l2reg
+        X = np.array([[0.5, 0.3], [1, 0.8], [1, 1.4], [0.6, 0.9]])
+        
+        expected = np.array([[3.61, 2.89 , 3.1], [2.89, 4.5 , 3.4], [3.1, 3.4, 4]])
+
+        hess = self.svm._compute_hessian(np.array([0,1,2,3]))
+
+        np.testing.assert_array_almost_equal(expected, hess)
+        
+          
+    
 
 
 if __name__ == '__main__':

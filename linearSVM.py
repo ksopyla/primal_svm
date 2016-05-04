@@ -162,28 +162,34 @@ class PrimalSVM():
         d : {array-like}  - vector along which we seek optimal sollution
         
         """
-        #out = np.fmax(0, out)
         
-        t=0
         Xd = self._X.dot(d[0:-1])+d[-1]
         wd = self.l2reg * w[0:-1].dot(d[0:-1])
         dd = self.l2reg * d[0:-1].dot(d[0:-1])
         
         Y = self._Y
         
-        while True:
+        
+        t=0
+        iter=0
+        out2=out
+        
+        #we do only max 1000 iteration, it should be enough
+        while iter<1000:
             out2 = out -t*(Y*Xd)
             sv = np.where( out>0)[0]
             
             #gradient along the line
-            g = wd + t*dd - (out2[sv]*Y[sv]).dot(Xd[sv,:])
+            g = wd + t*dd - (out2[sv]*Y[sv]).dot(Xd[sv])
             # second derivative along the line
-            h = dd + Xd[sv,:].dot(Xd[sv,:])
+            h = dd + Xd[sv].dot(Xd[sv])
             # 1D Newton step
             t=t-g/h
             
             if g**2/h < 1e-10:
                 break
+            iter=iter+1
+            
         return t, out2
     
     def predict(self, X):

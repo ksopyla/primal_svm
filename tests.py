@@ -11,6 +11,7 @@ class PrimalSVMTests(unittest.TestCase):
         self.Y = np.array([-1, -1, 1, 1])
         self.svm = PrimalSVM()
         self.svm._X = self.X
+        self.svm._Y = self.Y
 
     def test_obj_value_points_correctly_class_close_to_hyperplane(self):
         bias = 0.0
@@ -73,7 +74,28 @@ class PrimalSVMTests(unittest.TestCase):
 
         np.testing.assert_array_almost_equal(expected, hess)
         
-          
+        
+    def test_compute_linesearch_w_eq_zero(self):
+        
+        bias = 0.0
+        w = np.array([0, 0, bias])
+        l = self.svm.l2reg
+        
+        
+        out = np.array([1,1,1,1])
+        
+        #values computed with use of matlab implementation
+        d= np.array([ -0.07716665,  0.75756366, -0.58412495])
+        expected_out = np.array([0.60456081, 0.94475931, 0.60070248, 0.94861765])
+        expected_t=1
+
+
+        t, out2 = self.svm._line_search(w,d,out)
+
+        self.assertAlmostEqual(expected_t, t)
+        
+        np.testing.assert_array_almost_equal(expected_out, out2)
+        
     
 
 

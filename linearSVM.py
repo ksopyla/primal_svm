@@ -83,9 +83,7 @@ class PrimalSVM():
             
             t, out = self._line_search(w,step,out)
             
-            t=0.1
-            w = w+t*step
-            
+            self.w = self.w+t*step
             
             if step.dot(grad) < self._prec* obj:
                 break;

@@ -1,6 +1,8 @@
 # Primal SVM implementation in python
 
-This python port of Primal SVM - fast linear SVM implementation by Olivier Chapelle http://olivier.chapelle.cc/primal/
+This projekct is python port of Matlab Primal SVM - fast linear SVM implementation by Olivier Chapelle http://olivier.chapelle.cc/primal/
+
+It can handle realy big datasets eficiently.
 
 There are two solvers implemented:
 
@@ -8,4 +10,7 @@ There are two solvers implemented:
 * Conjugate Gradient solver - better for large and sparse problems
 
 
+ ## Code
  
+ * Grab the code - Github - https://github.com/ksopyla/primal_svm
+ * Run the code at PLON - https://plon.io/explore/primal-svm/uxMhHaqwbjgh3yVAQ

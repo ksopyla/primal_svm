@@ -56,7 +56,7 @@ class PrimalSVM():
         #we add one last component, which is b (bias)
         self.w = np.zeros(d+1)
         #helper variable for storing 1-Y*(np.dot(X,w))
-        self.out = np.ones(n,1)
+        self.out = np.ones(n)
         
         l= self.l2reg
         #the number of alg. iteration
@@ -68,7 +68,7 @@ class PrimalSVM():
                 print("Maximum {0} of Newton stpes reached, change newton_iter parameter or try larger lambda".format(iter))
                 break
             
-            obj, grad = self._obj_func(self.w,X,Y,out)
+            obj, grad = self._obj_func(self.w,X,Y,self.out)
             
             #np.where retunrs a tuple, we take the first dim
             sv = np.where( self.out>0)[0]
@@ -79,11 +79,11 @@ class PrimalSVM():
             # %timeit np.linalg.lstsq(hess,grad)
             # %timeit np.linalg.solve(hess,grad) - is faster 4x
             
-            step = np.linalg.solve(hess,grad)
+            step = -np.linalg.solve(hess,grad)
             
-            t, out = self._line_search(w,step,out)
+            t, self.out = self._line_search(self.w,step,self.out)
             
-            self.w = self.w+t*step
+            self.w = self.w + t*step
             
             if step.dot(grad) < self._prec* obj:
                 break;
@@ -191,6 +191,15 @@ class PrimalSVM():
         return t, out2
     
     def predict(self, X):
-        pass
+        
+        
+        w = self.w[0:-1]
+        b= self.w[-1]
+        
+        prediction_val = X.dot(w)+b
+        
+        prediction = np.sign(prediction_val)
+        
+        return prediction, prediction_val
     
     

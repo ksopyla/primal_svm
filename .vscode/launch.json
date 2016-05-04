@@ -1,0 +1,19 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Python",
+			"type": "python",
+			"request": "launch",
+			"stopOnEntry": true,
+			"program": "${file}",
+			"pythonPath": "D:/Projects/Python/WinPython-64bit-3.4.4.1/python-3.4.4.amd64/python.exe",
+			"externalConsole":false,
+			"debugOptions": [
+				"WaitOnAbnormalExit",
+				"WaitOnNormalExit",
+				"RedirectOutput"
+			]
+		}
+	]
+}

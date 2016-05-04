@@ -6,3 +6,11 @@ Y = np.array([-1, -1, 1, 1])
 svm = lsvm.PrimalSVM()
 
 svm.fit(X,Y)
+
+pred, pred_val = svm.predict(X)
+
+acc = np.sum(pred==Y)/len(Y)
+
+print(svm.w)
+print(pred_val)
+print('accuracy={}'.format(acc))

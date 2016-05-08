@@ -1,6 +1,16 @@
 import numpy as np
+import scipy as scp
+
+
+
 from scipy import sparse as sp
 from scipy.sparse import linalg
+
+
+#from scipy.sparse.linalg import LinearOperator
+
+
+
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 
@@ -41,7 +51,7 @@ class PrimalSVM():
         if method==0:
             self._solve_Newton(X,Y)
         else:
-            self._solve_CG()
+            self._solve_CG(X,Y)
           
         
         return self
@@ -50,16 +60,27 @@ class PrimalSVM():
     def _solve_Newton(self,X,Y):
         """
         Solve the primal SVM problem with Newton method
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
+            Training vector, where n_samples in the number of samples and
+            n_features is the number of features.
+        Y : array-like, shape = [n_samples]
+            Target vector relative to X
+        method: 0 - Newton method (with full Hessian computation), 1 - Conjugate Gradient method
+        Returns
+        -------
+        Nothing - just sets the proper value of parameter 'w'
         """
-        [n,d] = X.shape
+        [n, d] = X.shape
         
-        #we add one last component, which is b (bias)
+        # we add one last component, which is b (bias)
         self.w = np.zeros(d+1)
-        #helper variable for storing 1-Y*(np.dot(X,w))
+        # helper variable for storing 1-Y*(np.dot(X,w))
         self.out = np.ones(n)
         
         l= self.l2reg
-        #the number of alg. iteration
+        # the number of alg. iteration
         iter=0
         
         while True:
@@ -70,12 +91,12 @@ class PrimalSVM():
             
             obj, grad = self._obj_func(self.w,X,Y,self.out)
             
-            #np.where retunrs a tuple, we take the first dim
+            # np.where retunrs a tuple, we take the first dim
             sv = np.where( self.out>0)[0]
            
             hess = self._compute_hessian(sv)
             
-            #compute step vector step = -hess\grad
+            # compute step vector step = -hess\grad
             # %timeit np.linalg.lstsq(hess,grad)
             # %timeit np.linalg.solve(hess,grad) - is faster 4x
             
@@ -90,9 +111,68 @@ class PrimalSVM():
 
         
         
-    def _solve_CG(self):
-        pass
+    def _solve_CG(self,X,Y):
+        """
+        Solve the primal SVM problem with Newton method without computing hessina matrix explicit,
+        good for big sparse matrix
+        """
+        [n, d] = X.shape
+        
+        # we add one last component, which is b (bias)
+        self.w = np.zeros(d+1)
+
+        # helper variable for storing 1-Y*(np.dot(X,w))
+        self.out = np.ones(n)
+        
+        l= self.l2reg
+        # the number of alg. iteration
+        iter=0
+        
+        # create lineara operator, acts as matrix vector multiplication, without storing full matrix(hessian)
+        hess_vec = linalg.LinearOperator((d+1, d+1), matvec=self._matvec_mull)
+
+        
+        while True:
+            iter=iter+1
+            if iter > self.newton_iter:
+                print("Maximum {0} of Newton steps reached, change newton_iter parameter or try larger lambda".format(iter))
+                break
+            
+            obj, grad = self._obj_func(self.w,X,Y,self.out)
+            
+            # np.where retunrs a tuple, we take the first dim
+            sv = np.where( self.out>0)[0]
+
+            step, info = linalg.minres(hess_vec, -grad)
+            
+            t, self.out = self._line_search(self.w,step,self.out)
+            
+            self.w = self.w + t*step
+            
+            if step.dot(grad) < self._prec* obj:
+                break;
    
+    def _matvec_mull(self, v):
+        """
+        helper function for linalg.LinearOperator class, acts as multiplication function for big matrix and vector
+        without explicite forming a often big square matrix 
+        """
+        
+        X = self._X
+        l = self.l2reg
+        
+        y = l*v
+        y[-1] = 0
+        
+        z = X.dot(v[0:-1]) + v[-1]
+        
+        y = y + np.append( z.dot(X), z.sum())
+        
+        # np.append( [np.dot(out*Y,X)], [np.sum(out*Y)])
+        
+        return y
+        
+       
    
     def _compute_hessian(self, sv):
         """
@@ -167,7 +247,6 @@ class PrimalSVM():
         
         Y = self._Y
         
-        
         t=0
         iter=0
         out2=out
@@ -191,7 +270,7 @@ class PrimalSVM():
         return t, out2
     
     def predict(self, X):
-        
+    
         
         w = self.w[0:-1]
         b= self.w[-1]

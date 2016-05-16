@@ -3,7 +3,7 @@ import linearSVM as lsvm
 
 X = np.array([[0.5, 0.3], [1, 0.8], [1, 1.4], [0.6, 0.9]])
 Y = np.array([-1, -1, 1, 1])
-svm = lsvm.PrimalSVM()
+svm = lsvm.PrimalSVM(l2reg=0.1)
 
 svm.fit(X,Y)
 
@@ -14,3 +14,4 @@ acc = np.sum(pred==Y)/len(Y)
 print(svm.w)
 print(pred_val)
 print('accuracy={}'.format(acc))
+

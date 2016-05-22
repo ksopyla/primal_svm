@@ -106,7 +106,7 @@ class PrimalSVM():
             
             self.w = self.w + t*step
             
-            if step.dot(grad) < self._prec* obj:
+            if -step.dot(grad) < self._prec* obj:
                 break;
 
         
@@ -223,11 +223,14 @@ class PrimalSVM():
         """
         
         l2reg = self.l2reg
+
         w0 = w
         w0[-1]=0
-        obj = np.sum(out**2)/2+l2reg*w0.dot(w0)/2
+
+        max_out = np.fmax(0,out)
+        obj = np.sum(max_out**2)/2+l2reg*w0.dot(w0)/2
         
-        grad = l2reg*w0 - np.append( [np.dot(out*Y,X)], [np.sum(out*Y)])
+        grad = l2reg*w0 - np.append( [np.dot(max_out*Y,X)], [np.sum(max_out*Y)])
         
         return (obj,grad)
         
@@ -254,7 +257,7 @@ class PrimalSVM():
         #we do only max 1000 iteration, it should be enough
         while iter<1000:
             out2 = out -t*(Y*Xd)
-            sv = np.where( out>0)[0]
+            sv = np.where( out2>0)[0]
             
             #gradient along the line
             g = wd + t*dd - (out2[sv]*Y[sv]).dot(Xd[sv])

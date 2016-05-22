@@ -5,37 +5,38 @@ print(__doc__)
 
 
 # Standard scientific Python imports
-import matplotlib.pyplot as plt
-import numpy as np
-from time import time
 
-from mnist_helpers import *
+import linearSVM as lsvm
+from examples.mnist_helpers import *
 
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
-#fetch original mnist dataset
+# fetch original mnist dataset
 from sklearn.datasets import fetch_mldata
+import datetime as dt
+
+
 mnist = fetch_mldata('MNIST original', data_home='./')
 
-#minist object contains: data, COL_NAMES, DESCR, target fields
-#you can check it by running
+# minist object contains: data, COL_NAMES, DESCR, target fields
+# you can check it by running
 mnist.keys()
 
-#data field is 70k x 784 array, each row represents pixels from 28x28=784 image
+# data field is 70k x 784 array, each row represents pixels from 28x28=784 image
 images = mnist.data
 targets = mnist.target
 
 # Let's have a look at the random 16 images, 
 # We have to reshape each data row, from flat array of 784 int to 28x28 2D array
-#pick  random indexes from 0 to size of our dataset
+# pick  random indexes from 0 to size of our dataset
 show_some_digits(images,targets)
 
 
-#full dataset classification
+# full dataset classification
 X_data =images/255.0
 Y = targets
 
-#split data to train and test 
+# split data to train and test
 from sklearn.cross_validation import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X_data, Y, test_size=0.15, random_state=42)
 
@@ -43,29 +44,36 @@ X_train, X_test, y_train, y_test = train_test_split(X_data, Y, test_size=0.15, r
 # Create a classifier: a support vector classifier
 classifier = svm.LinearSVC(C=1)
 
-import datetime as dt
+
 # We learn the digits on train part
 start_time = dt.datetime.now()
-print 'Start learning at {}'.format(str(start_time))
+print('Start learning at {}'.format(str(start_time)))
 classifier.fit(X_train, y_train)
-end_time = dt.datetime.now() 
-print 'Stop learning {}'.format(str(end_time))
-elapsed_time= end_time - start_time
-print 'Elapsed learning {}'.format(str(elapsed_time))
+end_time = dt.datetime.now()
+print('Stop learning {}'.format(str(end_time)))
+elapsed_time = end_time - start_time
+print('Elapsed learning {}'.format(str(elapsed_time)))
 
 
 # Now predict the value of the test
 expected = y_test
 predicted = classifier.predict(X_test)
 
+acc = np.sum(predicted == expected)/len(expected)
+
+print(classifier.coef_)
+
+print('accuracy={}'.format(acc))
+acc = 0
+
+
 show_some_digits(X_test,predicted,title_text="Predicted {}")
 
 print("Classification report for classifier %s:\n%s\n"
       % (classifier, metrics.classification_report(expected, predicted)))
-      
+
 cm = metrics.confusion_matrix(expected, predicted)
 print("Confusion matrix:\n%s" % cm)
-
 
 plt.figure()
 
@@ -75,12 +83,12 @@ plot_confusion_matrix(cm)
 psvm = lsvm.PrimalSVM(l2reg=0.1)
 
 start_time = dt.datetime.now()
-print 'Start learning at {}'.format(str(start_time))
+print('Start learning at {}'.format(str(start_time)))
 psvm.fit(X_train, y_train)
 end_time = dt.datetime.now() 
-print 'Stop learning {}'.format(str(end_time))
+print('Stop learning {}'.format(str(end_time)))
 elapsed_time= end_time - start_time
-print 'Elapsed learning {}'.format(str(elapsed_time))
+print('Elapsed learning {}'.format(str(elapsed_time)))
 
 
 

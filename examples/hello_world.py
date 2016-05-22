@@ -11,8 +11,8 @@ pred, pred_val = svm.predict(X)
 
 acc = np.sum(pred==Y)/len(Y)
 
-print(svm.w)
-print(pred_val)
+print("w={}".format(svm.w))
+print("pred vals={}".format(pred_val))
 print('accuracy={}'.format(acc))
 
 
@@ -23,7 +23,8 @@ pred, pred_val = svm.predict(X)
 
 acc = np.sum(pred==Y)/len(Y)
 
-print(svm.w)
-print(pred_val)
+print("w={}".format(svm.w))
+print("pred vals={}".format(pred_val))
+
 print('accuracy={}'.format(acc))
 

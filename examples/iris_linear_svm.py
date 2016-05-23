@@ -127,7 +127,7 @@ psvm = lsvm.PrimalSVM(l2reg=0.1)
 
 start_time = dt.datetime.now()
 print('Start learning primal,  {}'.format(str(start_time)))
-psvm.fit(X_train, y_train)
+psvm.fit(X_train, y_train, method=1)
 end_time = dt.datetime.now() 
 print('Stop learning {}'.format(str(end_time)))
 elapsed_time= end_time - start_time
@@ -137,7 +137,7 @@ print('Elapsed learning {}'.format(str(elapsed_time)))
 
 pred, pred_val = psvm.predict(X_test)
 
-acc = np.sum(pred==Y)/len(Y)
+acc = np.sum(pred==y_test)/len(y_test)
 
 print(psvm.w)
 print(pred_val)
